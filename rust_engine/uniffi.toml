@@ -1,0 +1,10 @@
+[bindings]
+kotlin = false
+swift = false
+python = false
+ruby = false
+typescript = true
+
+[bindings.typescript]
+package_name = "nexus-engine"
+out_dir = "../mobile_app/src/bridge"
