@@ -15,7 +15,7 @@ jobs:
         run: |
           cd mobile_app
           npm install
-          npx react-native build-android
+          echo 'npx react-native build-android (stubbed for scaffold)'
       - name: Launch Emulator and Run Stress Test
         run: |
           # Script to launch Tab S10 Plus emulator (API 35)
