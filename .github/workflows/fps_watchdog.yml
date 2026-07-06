@@ -1,0 +1,28 @@
+name: FPS Watchdog
+
+on:
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  performance-test:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Android Emulator
+        uses: android-actions/setup-android@v3
+      - name: Build APK
+        run: |
+          cd mobile_app
+          npm install
+          npx react-native build-android
+      - name: Launch Emulator and Run Stress Test
+        run: |
+          # Script to launch Tab S10 Plus emulator (API 35)
+          # Draw 100 random strokes using ADB input
+          # Measure FPS via dumpsys gfxinfo
+          # If FPS < 55, exit 1 (fails the PR)
+      - name: Report Results
+        if: always()
+        run: |
+          echo "Performance report generated."

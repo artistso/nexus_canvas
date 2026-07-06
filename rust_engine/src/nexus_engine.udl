@@ -1,0 +1,117 @@
+namespace nexus_engine {
+    u32 version();
+};
+
+dictionary Point {
+    f32 x;
+    f32 y;
+    f32 pressure;
+};
+
+dictionary StrokeData {
+    sequence<Point> points;
+    string color_hex;
+    f32 width;
+    u32 layer_id;
+};
+
+dictionary ColorPalette {
+    string primary;
+    string secondary;
+    string accent;
+    sequence<string> shades;
+};
+
+[Enum]
+interface CanvasEvent {
+    StrokePoint(u32 stroke_id, f32 x, f32 y, f32 pressure);
+    StrokeFinished(u32 stroke_id);
+    ThemeChanged(string new_primary, sequence<string> new_palette);
+};
+
+dictionary LayerInfo {
+    u32 id;
+    string name;
+    f32 opacity;
+    u32 blend_mode;
+    boolean visible;
+    boolean locked;
+    boolean is_active;
+};
+
+dictionary ViewportState {
+    f32 center_x;
+    f32 center_y;
+    f32 scale;
+    f32 rotation;
+    f32 screen_width;
+    f32 screen_height;
+};
+
+dictionary Rect {
+    f32 x;
+    f32 y;
+    f32 width;
+    f32 height;
+};
+
+dictionary SelectionMask {
+    boolean is_active;
+    sequence<Point> points;
+    Rect bounds;
+    sequence<u8> mask_data;
+    u32 width;
+    u32 height;
+};
+
+interface NexusEngine {
+    constructor();
+    void start_stroke(u32 stroke_id);
+    void add_point(u32 stroke_id, Point point);
+    void finish_stroke(u32 stroke_id);
+    void apply_theme(ColorPalette palette);
+    sequence<StrokeData> get_recent_strokes(u32 count);
+    void undo();
+    void redo();
+    void set_stabilizer_strength(f32 strength);
+    void push_event(CanvasEvent event);
+    sequence<u8> export_events();
+    void import_events(sequence<u8> data);
+    boolean undo_time_travel();
+// ====== LAYER API ======
+    u32 add_layer();
+    boolean remove_layer(u32 id);
+    void set_active_layer(u32 id);
+    sequence<LayerInfo> get_layer_stack();
+    void toggle_layer_visibility(u32 id);
+    void toggle_layer_lock(u32 id);
+    void set_layer_opacity(u32 id, f32 opacity);
+    void reorder_layers(sequence<u32> ids);
+// ====== VIEWPORT API ======
+    void zoom_viewport(f32 factor, f32 anchor_x, f32 anchor_y);
+    void pan_viewport(f32 dx, f32 dy);
+    void rotate_viewport(f32 radians);
+    ViewportState get_viewport();
+    void reset_viewport();
+// ====== PROJECT IO ======
+    sequence<u8> export_project(string name);
+    void import_project(sequence<u8> data);
+// ====== DICTIONARIES ======
+// ====== SELECTIONS ======
+    void activate_lasso_selection(sequence<Point> points);
+    void activate_rect_selection(f32 x, f32 y, f32 width, f32 height);
+    void magic_wand_selection(u32 x, u32 y, u8 threshold);
+    void clear_selection();
+    SelectionMask get_selection();
+// ====== FILTERS ======
+    void apply_brightness_contrast(f32 brightness, f32 contrast);
+    void apply_hsl(f32 hue, f32 saturation, f32 lightness);
+    void apply_blur(f32 radius);
+// ====== EXPORT ======
+    void export_psd(string path);
+    void export_png(string path);
+// ====== PERFORMANCE ======
+    f32 get_last_render_time_ms();
+    u32 get_cache_hit_ratio();
+// ====== DICTIONARIES ======
+};
